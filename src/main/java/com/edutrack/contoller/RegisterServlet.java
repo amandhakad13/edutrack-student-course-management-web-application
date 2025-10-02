@@ -39,6 +39,16 @@ public class RegisterServlet extends HttpServlet {
 		String password = request.getParameter("password");
 		String role = request.getParameter("role");
 		
+		if(name==null || name.trim().isEmpty() ||
+		   email==null || email.trim().isEmpty() ||
+		   password==null || role==null || role.trim().isEmpty()) {
+			
+			HttpSession hs = request.getSession();
+			hs.setAttribute("error", "All fields must be required");
+			response.sendRedirect("register.jsp");
+			return;
+		}
+		
 		User u = new User();
 		u.setName(name);
 		u.setEmail(email);
@@ -55,12 +65,22 @@ public class RegisterServlet extends HttpServlet {
 				hs.setAttribute("success", "Registration Successfull");
 				response.sendRedirect("login.jsp");
 			}
+			else if(insert == -1) {
+				HttpSession hs = request.getSession();
+				hs.setAttribute("duplicate", "Email Already Registered");
+				response.sendRedirect("register.jsp");
+			}
 			else {
-				response.getWriter().print("Something Went Wrong");
+				HttpSession hs = request.getSession();
+				hs.setAttribute("error1", "Something Went Wrong. Please try again.");
+				response.sendRedirect("register.jsp");
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			HttpSession hs = request.getSession();
+			hs.setAttribute("unexpected", "Database issue. Try again later");
+			response.sendRedirect("register.jsp");
 		}
 	}
 
